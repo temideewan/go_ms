@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"sync"
 )
 
 var ErrTruckNotFound = errors.New("truck not found")
@@ -21,9 +22,12 @@ type Truck struct {
 
 type truckManager struct {
 	trucks map[string]*Truck
+	sync.RWMutex
 }
 
 func (m *truckManager) AddTruck(id string, cargo int) error {
+	m.Lock()
+	defer m.Unlock()
 	if _, exists := m.trucks[id]; exists {
 		return fmt.Errorf("That truck with id %s already exists", id)
 	}
@@ -36,6 +40,8 @@ func (m *truckManager) AddTruck(id string, cargo int) error {
 }
 
 func (m *truckManager) GetTruck(id string) (*Truck, error) {
+	m.RLock()
+	defer m.RUnlock()
 	truck, exists := m.trucks[id]
 	if !exists {
 		return nil, ErrTruckNotFound
@@ -43,6 +49,8 @@ func (m *truckManager) GetTruck(id string) (*Truck, error) {
 	return truck, nil
 }
 func (m *truckManager) RemoveTruck(id string) error {
+	m.Lock()
+	defer m.Unlock()
 	_, exists := m.trucks[id]
 	if !exists {
 		return ErrTruckNotFound
@@ -52,6 +60,8 @@ func (m *truckManager) RemoveTruck(id string) error {
 }
 
 func (m *truckManager) UpdateTruckCargo(id string, cargo int) error {
+	m.Lock()
+	defer m.Unlock()
 	truck, exists := m.trucks[id]
 	if !exists {
 		return ErrTruckNotFound
