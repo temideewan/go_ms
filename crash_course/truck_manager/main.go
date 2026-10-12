@@ -10,7 +10,7 @@ var ErrTruckNotFound = errors.New("truck not found")
 
 type FleetManager interface {
 	AddTruck(id string, cargo int) error
-	GetTruck(id string) (*Truck, error)
+	GetTruck(id string) (Truck, error)
 	RemoveTruck(id string) error
 	UpdateTruckCargo(id string, cargo int) error
 }
@@ -28,33 +28,25 @@ type truckManager struct {
 func (m *truckManager) AddTruck(id string, cargo int) error {
 	m.Lock()
 	defer m.Unlock()
-	if _, exists := m.trucks[id]; exists {
-		return fmt.Errorf("That truck with id %s already exists", id)
-	}
-	newTruck := &Truck{
+	m.trucks[id] = &Truck{
 		ID:    id,
 		Cargo: cargo,
 	}
-	m.trucks[id] = newTruck
 	return nil
 }
 
-func (m *truckManager) GetTruck(id string) (*Truck, error) {
+func (m *truckManager) GetTruck(id string) (Truck, error) {
 	m.RLock()
 	defer m.RUnlock()
 	truck, exists := m.trucks[id]
 	if !exists {
-		return nil, ErrTruckNotFound
+		return Truck{}, ErrTruckNotFound
 	}
-	return truck, nil
+	return *truck, nil
 }
 func (m *truckManager) RemoveTruck(id string) error {
 	m.Lock()
 	defer m.Unlock()
-	_, exists := m.trucks[id]
-	if !exists {
-		return ErrTruckNotFound
-	}
 	delete(m.trucks, id)
 	return nil
 }
