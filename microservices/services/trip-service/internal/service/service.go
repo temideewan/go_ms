@@ -35,8 +35,34 @@ func (s *service) CreateTrip(ctx context.Context, fare *domain.RideFareModel) (*
 	return s.repo.CreateTrip(ctx, trip)
 }
 
-func (s *service) GetRoute(ctx context.Context, pickup, destination *types.Coordinate) (*types.OSRMApiResponse, error) {
-	url := fmt.Sprintf("http://router.project-osrm.org/route/v1/driving/%f,%f;%f,%f?overview=full&geometries=geojson", pickup.Longitude, pickup.Latitude, destination.Longitude, destination.Latitude)
+func (s *service) GetRoute(ctx context.Context, pickup, destination *types.Coordinate, useOSRMApi bool) (*types.OSRMApiResponse, error) {
+	if !useOSRMApi {
+		// Return a simple mock response in case we don't want to rely on an external API
+		return &types.OSRMApiResponse{
+			Routes: []struct {
+				Distance float64 `json:"distance"`
+				Duration float64 `json:"duration"`
+				Geometry struct {
+					Coordinates [][]float64 `json:"coordinates"`
+				} `json:"geometry"`
+			}{
+				{
+					Distance: 5.0, // 5km
+					Duration: 600, // 10 minutes
+					Geometry: struct {
+						Coordinates [][]float64 `json:"coordinates"`
+					}{
+						Coordinates: [][]float64{
+							{pickup.Latitude, pickup.Longitude},
+							{destination.Latitude, destination.Longitude},
+						},
+					},
+				},
+			},
+		}, nil
+	}
+	baseUrl := "http://router.project-osrm.org"
+	url := fmt.Sprintf("%s/route/v1/driving/%f,%f;%f,%f?overview=full&geometries=geojson", baseUrl, pickup.Longitude, pickup.Latitude, destination.Longitude, destination.Latitude)
 	log.Printf("pick up and destination: %+v, %+v", pickup, destination)
 	log.Printf("url is: %v", url)
 	resp, err := http.Get(url)
