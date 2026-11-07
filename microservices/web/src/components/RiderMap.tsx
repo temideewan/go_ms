@@ -10,7 +10,7 @@ import { MapClickHandler } from './MapClickHandler';
 import { Button } from './ui/button';
 import { RouteFare, RequestRideProps, TripPreview, HTTPTripStartResponse } from "../types";
 import { RoutingControl } from "./RoutingControl";
-import { API_URL } from '../constants';
+import { API_URL, MAP_API_KEY } from '../constants';
 import { RiderTripOverview } from './RiderTripOverview';
 import { BackendEndpoints, HTTPTripPreviewRequestPayload, HTTPTripPreviewResponse, HTTPTripStartRequestPayload } from '../contracts';
 
@@ -21,6 +21,7 @@ const userMarker = new L.Icon({
     iconSize: [40, 40], // Size of the marker
     iconAnchor: [20, 40], // Anchor point
 });
+
 
 const driverMarker = new L.Icon({
     iconUrl: "https://www.svgrepo.com/show/25407/car.svg",
@@ -160,7 +161,7 @@ export default function RiderMap({ onRouteSelected }: RiderMapProps) {
                     ref={mapRef}
                 >
                     <TileLayer
-                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                        url={`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=${MAP_API_KEY}`}
                         attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/'>CARTO</a>"
                     />
                     <Marker position={[location.latitude, location.longitude]} icon={userMarker} />
