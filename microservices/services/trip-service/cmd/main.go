@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"ride-sharing/services/trip-service/internal/infrastructure/grpc"
 	"ride-sharing/services/trip-service/internal/infrastructure/repository"
 	"ride-sharing/services/trip-service/internal/service"
 	"ride-sharing/shared/env"
@@ -37,8 +38,9 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
+	// starting the grpc server
 	grpcServer := grpcserver.NewServer()
-	// TODO: initialize our grpc handler implementation
+	grpc.NewGRPCHandler(grpcServer, svc)
 	log.Printf("starting GRPC server trip service on port %s", ls.Addr().String())
 
 	go func() {
@@ -50,6 +52,6 @@ func main() {
 
 	// wait for the shutdown signal
 	<-ctx.Done()
-	log.Printf("Shutting down the server", err)
+	log.Printf("Shutting down the server: %v", err)
 	grpcServer.GracefulStop()
 }

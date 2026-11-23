@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"ride-sharing/services/trip-service/internal/domain"
+	tripType "ride-sharing/services/trip-service/pkg/types"
 	"ride-sharing/shared/types"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -35,10 +36,10 @@ func (s *service) CreateTrip(ctx context.Context, fare *domain.RideFareModel) (*
 	return s.repo.CreateTrip(ctx, trip)
 }
 
-func (s *service) GetRoute(ctx context.Context, pickup, destination *types.Coordinate, useOSRMApi bool) (*types.OSRMApiResponse, error) {
+func (s *service) GetRoute(ctx context.Context, pickup, destination *types.Coordinate, useOSRMApi bool) (*tripType.OSRMApiResponse, error) {
 	if !useOSRMApi {
 		// Return a simple mock response in case we don't want to rely on an external API
-		return &types.OSRMApiResponse{
+		return &tripType.OSRMApiResponse{
 			Routes: []struct {
 				Distance float64 `json:"distance"`
 				Duration float64 `json:"duration"`
@@ -75,7 +76,7 @@ func (s *service) GetRoute(ctx context.Context, pickup, destination *types.Coord
 	if err != nil {
 		return nil, fmt.Errorf("Failed to read response: %v", err)
 	}
-	var routesResp types.OSRMApiResponse
+	var routesResp tripType.OSRMApiResponse
 	if err := json.Unmarshal(body, &routesResp); err != nil {
 		return nil, fmt.Errorf("Failed to parse response: %v", err)
 	}

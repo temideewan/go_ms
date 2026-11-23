@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"ride-sharing/services/trip-service/internal/domain"
 	"ride-sharing/shared/types"
-	"time"
 )
 
 type HttpHandler struct {
@@ -20,7 +19,6 @@ type previewTripRequest struct {
 }
 
 func (h *HttpHandler) HandleTripPreview(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(time.Second * 9)
 	var reqBody previewTripRequest
 	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 		http.Error(w, "Failed to parse json data", http.StatusBadRequest)
